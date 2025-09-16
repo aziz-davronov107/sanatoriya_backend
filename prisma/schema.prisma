@@ -1,0 +1,237 @@
+// =====================
+// Prisma Schema
+// =====================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------- Enums ----------
+enum UserRole {
+  ADMIN
+  SALER
+  USER
+}
+
+enum ListingType {
+  RENT
+  SALE
+}
+
+enum PriceUnit {
+  PER_NIGHT
+  PER_MONTH
+  TOTAL
+}
+
+enum ListingStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+// ---------- Models ----------
+model User {
+  id         String   @id @default(uuid()) @db.Uuid
+  firstname  String   @db.VarChar(255)
+  lastname   String   @db.VarChar(255)
+  email      String   @unique @db.VarChar(255)
+  role       UserRole
+  password   String   @db.Text
+  avatar     String   @db.Text
+
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  accommodations  Accommodation[]
+  contacts        Contact[]
+  likes           Like[]
+  ratings         Rating[]
+  bookings        Booking[]
+
+  @@index([email])
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(255)   // <-- add @unique
+  img       String   @db.Text
+  iconImg   String   @map("icon_img") @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  accommodations Accommodation[]
+
+  @@map("category")
+}
+
+model Amenity {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(255)
+  icon      String?  @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  accommodations AccommodationAmenity[]
+
+  @@map("amenity")
+}
+
+model Accommodation {
+  id             String        @id @default(uuid()) @db.Uuid
+
+  isActive       Boolean       @default(true)
+  status         ListingStatus @default(PUBLISHED)
+  listingType    ListingType   @map("listing_type")
+
+  title          String        @db.VarChar(255)
+  address        String        @db.Text              // <- typo fix: "addres" emas
+  description    String        @db.Text
+
+  city           String?       @db.VarChar(255)
+
+
+  price          Decimal       @db.Decimal(12, 2)
+  currency       String        @default("UZS") @db.VarChar(10)
+  priceUnit      PriceUnit     @default(PER_MONTH)
+
+  discount       Decimal       @default(0) @db.Decimal(5, 2)
+
+  buildYear      Int?          @map("build_year")
+  documents      Json?
+
+  userId         String        @map("user_id") @db.Uuid
+  categoryId     Int           @map("category_id")
+
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  category       Category      @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+
+  images         AccommodationImage[]
+  amenities      AccommodationAmenity[]
+  likes          Like[]
+  ratings        Rating[]
+  contacts       Contact[]
+  bookings       Booking[]
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([userId])
+  @@index([categoryId])
+  @@map("accommodation")
+}
+
+model AccommodationImage {
+  id               String   @id @default(uuid()) @db.Uuid
+  accommodationId  String   @db.Uuid
+  url              String   @db.Text
+
+  accommodation    Accommodation @relation(fields: [accommodationId], references: [id], onDelete: Cascade)
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([accommodationId])
+  @@map("accommodation_image")
+}
+
+model AccommodationAmenity {
+  accommodationId String       @db.Uuid
+  amenityId       Int
+
+  accommodation   Accommodation @relation(fields: [accommodationId], references: [id], onDelete: Cascade)
+  amenity         Amenity       @relation(fields: [amenityId], references: [id], onDelete: Cascade)
+
+  @@id([accommodationId, amenityId])
+  @@index([amenityId])
+  @@map("accommodation_amenity")
+}
+
+model Contact {
+  id               String   @id @default(uuid()) @db.Uuid
+  at               DateTime @default(now())
+  name             String   @db.VarChar(255)
+  phone            String   @db.Text
+  email            String   @db.Text
+  message          String   @db.Text
+
+  userId           String   @map("user_id") @db.Uuid
+  accommodationId  String   @map("accommodation_id") @db.Uuid
+
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accommodation    Accommodation @relation(fields: [accommodationId], references: [id], onDelete: Cascade)
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([userId])
+  @@index([accommodationId])
+  @@map("contact")
+}
+
+model Like {
+  userId           String  @map("user_id") @db.Uuid
+  accommodationId  String  @map("accommodation_id") @db.Uuid
+
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accommodation    Accommodation @relation(fields: [accommodationId], references: [id], onDelete: Cascade)
+
+  createdAt        DateTime @default(now())
+
+  @@id([userId, accommodationId])
+  @@index([accommodationId])
+  @@map("likes")
+}
+
+model Rating {
+  id               Int      @id @default(autoincrement())
+  clean            Decimal  @db.Decimal(2, 1)
+  location         Decimal  @db.Decimal(2, 1)
+  communicate      Decimal  @db.Decimal(2, 1)
+  overall          Decimal? @db.Decimal(2, 1)
+
+  userId           String   @map("user_id") @db.Uuid
+  accommodationId  String   @map("accommodation_id") @db.Uuid
+
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accommodation    Accommodation @relation(fields: [accommodationId], references: [id], onDelete: Cascade)
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@unique([userId, accommodationId])
+  @@index([userId])
+  @@index([accommodationId])
+  @@map("rating")
+}
+
+model Booking {
+  id               String   @id @default(uuid()) @db.Uuid
+  accommodationId  String   @db.Uuid
+  userId           String   @db.Uuid
+
+  startDate        DateTime
+  endDate          DateTime
+  guests           Int       @default(1)
+
+  totalPrice       Decimal   @db.Decimal(12, 2)
+  currency         String    @default("UZS") @db.VarChar(10)
+  status           String    @default("PENDING") // PENDING/CONFIRMED/CANCELLED
+
+  accommodation    Accommodation @relation(fields: [accommodationId], references: [id], onDelete: Cascade)
+  user             User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  @@index([accommodationId])
+  @@index([userId])
+  @@map("booking")
+}
