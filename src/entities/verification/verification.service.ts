@@ -1,10 +1,10 @@
 // src/modules/verification/verification.service.ts
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { SendOtpDto, VerifyOtpDto, LimitedVerificationTypes } from './dto/verification.dto';
-import { EverifationsTypes, ICheckOtp } from 'src/common/types/verification';
+import { SendOtpDto, VerifyOtpDto } from './dto/verification.dto';
+import { EverifationsTypes } from 'src/common/types/verification';
 import { PrismaService } from 'src/core/db/prisma.service';
 import { MyRedisService } from 'src/common/redis/redis.service';
-import { EmailService } from 'src/common/service/mailer.service'; // ← senda shu yo'l bo'lsa
+import { EmailService } from 'src/common/service/mailer.service';
 import { generateOtp } from 'src/common/utils/random';
 
 @Injectable()
@@ -19,7 +19,8 @@ export class VerificationService {
     const subjects: Record<EverifationsTypes, string> = {
       [EverifationsTypes.REGISTER]: 'Ro‘yxatdan o‘tish tasdiqlash kodi',
       [EverifationsTypes.EMAIL_PASSWORD]: 'Parolni tiklash kodi',
-      [EverifationsTypes.EDIT_PHONE]: '', // Agar kerak bo'lmasa, olib tashlang yoki bo'sh qoldiring
+      [EverifationsTypes.EDIT_PHONE]: 'Telefonni yangilash tasdiqlash kodi',
+      [EverifationsTypes.LOGIN]: 'Kirish OTP kodi',
     };
     return subjects[type];
   }
@@ -36,28 +37,35 @@ export class VerificationService {
         <div style="font-size:24px; font-weight:700; letter-spacing:4px;">
           ${otp}
         </div>
-        <p style="color:#666">Kod 2 daqiqa ichida amal qiladi. Hech kimga bermang.</p>
+        <p style="color:#666">Kod 5 daqiqa ichida amal qiladi. Hech kimga bermang.</p>
       </div>
     `;
   }
 
   private async throwIfUserExists(email: string) {
     const user = await this.prisma.user.findUnique({ where: { email } });
-    if (user) throw new HttpException('Email already used', HttpStatus.BAD_REQUEST);
+    if (user)
+      throw new HttpException('Email already used', HttpStatus.BAD_REQUEST);
     return user;
   }
 
   private async throwIfUserNotExists(email: string) {
     const user = await this.prisma.user.findUnique({ where: { email } });
-    if (!user) throw new HttpException('User not found!', HttpStatus.BAD_REQUEST);
+    if (!user)
+      throw new HttpException('User not found!', HttpStatus.BAD_REQUEST);
     return user;
   }
 
-  public getKey(type: EverifationsTypes, email: string, confirmation?: boolean) {
+  public getKey(
+    type: EverifationsTypes,
+    email: string,
+    confirmation?: boolean,
+  ) {
     const storeKeys: Record<EverifationsTypes, string> = {
       [EverifationsTypes.REGISTER]: 'reg_',
       [EverifationsTypes.EMAIL_PASSWORD]: 'respass_',
-      [EverifationsTypes.EDIT_PHONE]: '', // Agar kerak bo'lmasa, olib tashlang yoki bo'sh qoldiring
+      [EverifationsTypes.EDIT_PHONE]: 'editphone_',
+      [EverifationsTypes.LOGIN]: 'login_',
     };
     let key = storeKeys[type];
     if (confirmation) key += 'cfm_';
@@ -67,41 +75,44 @@ export class VerificationService {
 
   async sendOtp(payload: SendOtpDto) {
     const { type, email } = payload;
-  const typeEnum = type as unknown as EverifationsTypes;
-    const key = this.getKey(typeEnum, email);
+    const key = this.getKey(type, email);
 
     const session = await this.redis.get(key);
     if (session) {
-      throw new HttpException('Code already sent to user', HttpStatus.BAD_REQUEST);
+      throw new HttpException(
+        'Code already sent to user',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
-    switch (typeEnum) {
+    // Holatga qarab mavjudlikni tekshir
+    switch (type) {
       case EverifationsTypes.REGISTER:
-        await this.throwIfUserExists(email);
+        await this.throwIfUserExists(email); // registerda bo‘lmasligi kerak
         break;
       case EverifationsTypes.EMAIL_PASSWORD:
-        await this.throwIfUserNotExists(email);
+      case EverifationsTypes.LOGIN:
+        await this.throwIfUserNotExists(email); // bu holatlarda bo‘lishi shart
         break;
     }
 
-    const otp = generateOtp();
-    await this.redis.set(key, JSON.stringify({ otp }), 300);
+    const otp = generateOtp(); // masalan, 6 xonali
+    await this.redis.set(key, JSON.stringify({ otp }), 300); // 5 daqiqa
 
-    const subject = this.subject(typeEnum);
-    const text = this.textMessage(typeEnum, otp);
-    const html = this.htmlMessage(typeEnum, otp);
+    const subject = this.subject(type);
+    const text = this.textMessage(type, otp);
+    const html = this.htmlMessage(type, otp);
 
-    // EmailService sendMail metodini tekshiring, agar nomi boshqacha bo'lsa, shu yerda to'g'rilang
-  // await this.emailService.sendMail(email, subject, text, html);
-  await this.emailService.sendOtpCode(email, otp);
+    // Agar sendMail(...) ishlatsa: await this.emailService.sendMail({ to: email, subject, text, html });
+    await this.emailService.sendOtpCode(email, otp);
 
     return { message: 'Confirmation code sent!' };
   }
 
   async verifyOtp(payload: VerifyOtpDto) {
     const { type, email, otp } = payload;
-  const typeEnum = type as unknown as EverifationsTypes;
-    const pendingKey = this.getKey(typeEnum, email);
+
+    const pendingKey = this.getKey(type, email);
     const session = await this.redis.get(pendingKey);
     if (!session) {
       throw new HttpException('OTP expired!', HttpStatus.BAD_REQUEST);
@@ -111,15 +122,22 @@ export class VerificationService {
     }
 
     await this.redis.delete(pendingKey);
-    await this.redis.set(this.getKey(typeEnum, email, true), JSON.stringify({ otp }), 600);
+    await this.redis.set(
+      this.getKey(type, email, true),
+      JSON.stringify({ otp }),
+      600,
+    );
 
     return { success: true, message: 'Verified' };
   }
 
-  public async checkConfigOtp(payload: ICheckOtp & { email: string }) {
+  public async checkConfigOtp(payload: {
+    type: EverifationsTypes;
+    email: string;
+    otp: string;
+  }) {
     const { type, email, otp } = payload;
-    const typeEnum = type as EverifationsTypes;
-    const confirmKey = this.getKey(typeEnum, email, true);
+    const confirmKey = this.getKey(type, email, true);
     const session = await this.redis.get(confirmKey);
     if (!session) {
       throw new HttpException('OTP expired!', HttpStatus.BAD_REQUEST);

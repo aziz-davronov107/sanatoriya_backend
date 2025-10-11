@@ -3,13 +3,17 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PrismaService } from '../db/prisma.service';
 import { Request } from 'express';
+import { constants } from 'buffer';
 
 function cookieExtractor(req: Request) {
   return req?.cookies?.['access-token'] ?? null;
 }
 
 @Injectable()
-export class AccessJwtStrategy extends PassportStrategy(Strategy, 'access-jwt') {
+export class AccessJwtStrategy extends PassportStrategy(
+  Strategy,
+  'access-jwt',
+) {
   constructor(private prisma: PrismaService) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
@@ -27,10 +31,13 @@ export class AccessJwtStrategy extends PassportStrategy(Strategy, 'access-jwt') 
 
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, email: true, firstname: true, lastname: true, role: true, avatar: true },
+      select: { id: true, email: true },
     });
-    if (!user) throw new UnauthorizedException('User not found');
 
-    return user; // becomes req.user
+    if (!user) throw new UnauthorizedException('User not found');
+    const profile = await this.prisma.profile.findUnique({
+      where: { userId },
+    });
+    return { ...user, role: profile!.role }; // becomes req.user
   }
 }

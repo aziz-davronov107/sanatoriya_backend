@@ -41,7 +41,13 @@ exports.CoreModule = CoreModule = __decorate([
             refresh_guard_1.RefreshTokenGuard,
             refresh_strategy_1.RefreshJwtStrategy,
         ],
-        exports: [passport_1.PassportModule, prisma_module_1.PrismaModule, jwt_1.JwtModule, mailer_service_1.EmailService, redis_model_1.MyRedisModel],
+        exports: [
+            passport_1.PassportModule,
+            prisma_module_1.PrismaModule,
+            jwt_1.JwtModule,
+            mailer_service_1.EmailService,
+            redis_model_1.MyRedisModel,
+        ],
     })
 ], CoreModule);
 //# sourceMappingURL=core.module.js.map

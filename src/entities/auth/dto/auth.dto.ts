@@ -1,61 +1,38 @@
-export enum UserRoleDto {
-  SALER = 'SALER',
-  USER = 'USER',
-}
-import { IsEnum, IsPhoneNumber, IsString } from 'class-validator';
-import { ApiProperty, PickType } from '@nestjs/swagger';
-
+import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateDto {
   @ApiProperty({
     description: 'Email',
     example: 'user@example.com',
+    required: true,
   })
-  @IsString()
+  @IsEmail()
   email: string;
 
-  @ApiProperty({
-    description: 'Parol (kamida 6 ta belgidan iborat)',
-    example: 'StrongP@ssw0rd',
-  })
+  @ApiProperty({ description: 'Tasdiqlash kodi (OTP)', example: '123456' })
   @IsString()
-  password: string;
-
-  @ApiProperty({
-    description: 'Ism',
-    example: 'Azizbek',
-  })
-  @IsString()
-  firstname: string;
-
-  @ApiProperty({
-    description: 'Familiya',
-    example: 'Davronov',
-  })
-  @IsString()
-  lastname: string;
-
-  @ApiProperty({ description: 'Tasdiqlash коди (OTP)' })
-  @IsString()
-  otp: string;
-  
-  @ApiProperty({ enum: UserRoleDto, description: 'Foydalanuvchi roli (faqat SALER yoki USER)', example: 'USER' })
-  @IsEnum(UserRoleDto)
-  role: UserRoleDto;
+  @IsNotEmpty()
+  otp!: string;
 }
 
 export class LoginDto {
   @ApiProperty({
     description: 'Email',
     example: 'user@example.com',
+    required: true,
   })
-  @IsString()
+  @IsEmail()
   email: string;
 
-  @ApiProperty({
-    description: 'Parol (kamida 6 ta belgidan iborat)',
-    example: 'yandiev',
-  })
+  @ApiProperty({ description: 'Tasdiqlash kodi (OTP)', example: '123456' })
   @IsString()
-  password: string;
+  @IsNotEmpty()
+  otp!: string;
 }

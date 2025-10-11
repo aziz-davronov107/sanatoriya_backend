@@ -1,5 +1,5 @@
 import { SendOtpDto, VerifyOtpDto } from './dto/verification.dto';
-import { EverifationsTypes, ICheckOtp } from 'src/common/types/verification';
+import { EverifationsTypes } from 'src/common/types/verification';
 import { PrismaService } from 'src/core/db/prisma.service';
 import { MyRedisService } from 'src/common/redis/redis.service';
 import { EmailService } from 'src/common/service/mailer.service';
@@ -21,7 +21,9 @@ export declare class VerificationService {
         success: boolean;
         message: string;
     }>;
-    checkConfigOtp(payload: ICheckOtp & {
+    checkConfigOtp(payload: {
+        type: EverifationsTypes;
         email: string;
+        otp: string;
     }): Promise<boolean>;
 }

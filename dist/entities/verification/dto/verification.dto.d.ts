@@ -1,9 +1,11 @@
-export declare enum LimitedVerificationTypes {
-    REGISTER = "register",
-    EMAIL_PASSWORD = "reset_email"
-}
+import { EverifationsTypes } from 'src/common/types/verification';
+export declare const LimitedVerificationTypes: {
+    readonly REGISTER: EverifationsTypes.REGISTER;
+    readonly EMAIL_PASSWORD: EverifationsTypes.EMAIL_PASSWORD;
+    readonly LOGIN: EverifationsTypes.LOGIN;
+};
 export declare class SendOtpDto {
-    type: LimitedVerificationTypes;
+    type: EverifationsTypes;
     email: string;
 }
 export declare class VerifyOtpDto extends SendOtpDto {

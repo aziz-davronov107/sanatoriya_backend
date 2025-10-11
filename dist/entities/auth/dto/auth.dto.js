@@ -9,84 +9,47 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.LoginDto = exports.CreateDto = exports.UserRoleDto = void 0;
-var UserRoleDto;
-(function (UserRoleDto) {
-    UserRoleDto["SALER"] = "SALER";
-    UserRoleDto["USER"] = "USER";
-})(UserRoleDto || (exports.UserRoleDto = UserRoleDto = {}));
-const class_validator_1 = require("class-validator");
+exports.LoginDto = exports.CreateDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
+const class_validator_1 = require("class-validator");
 class CreateDto {
     email;
-    password;
-    firstname;
-    lastname;
     otp;
-    role;
 }
 exports.CreateDto = CreateDto;
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: 'Email',
         example: 'user@example.com',
+        required: true,
     }),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsEmail)(),
     __metadata("design:type", String)
 ], CreateDto.prototype, "email", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({
-        description: 'Parol (kamida 6 ta belgidan iborat)',
-        example: 'StrongP@ssw0rd',
-    }),
+    (0, swagger_1.ApiProperty)({ description: 'Tasdiqlash kodi (OTP)', example: '123456' }),
     (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], CreateDto.prototype, "password", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        description: 'Ism',
-        example: 'Azizbek',
-    }),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], CreateDto.prototype, "firstname", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({
-        description: 'Familiya',
-        example: 'Davronov',
-    }),
-    (0, class_validator_1.IsString)(),
-    __metadata("design:type", String)
-], CreateDto.prototype, "lastname", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Tasdiqlash коди (OTP)' }),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
 ], CreateDto.prototype, "otp", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ enum: UserRoleDto, description: 'Foydalanuvchi roli (faqat SALER yoki USER)', example: 'USER' }),
-    (0, class_validator_1.IsEnum)(UserRoleDto),
-    __metadata("design:type", String)
-], CreateDto.prototype, "role", void 0);
 class LoginDto {
     email;
-    password;
+    otp;
 }
 exports.LoginDto = LoginDto;
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: 'Email',
         example: 'user@example.com',
+        required: true,
     }),
-    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsEmail)(),
     __metadata("design:type", String)
 ], LoginDto.prototype, "email", void 0);
 __decorate([
-    (0, swagger_1.ApiProperty)({
-        description: 'Parol (kamida 6 ta belgidan iborat)',
-        example: 'yandiev',
-    }),
+    (0, swagger_1.ApiProperty)({ description: 'Tasdiqlash kodi (OTP)', example: '123456' }),
     (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
-], LoginDto.prototype, "password", void 0);
+], LoginDto.prototype, "otp", void 0);
 //# sourceMappingURL=auth.dto.js.map

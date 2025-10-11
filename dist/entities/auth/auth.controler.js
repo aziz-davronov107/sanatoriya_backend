@@ -59,7 +59,8 @@ let AuthControler = class AuthControler {
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
         return {
-            access_token, refresh_token
+            access_token,
+            refresh_token,
         };
     }
     async refresh_token(req, res) {
@@ -72,7 +73,7 @@ let AuthControler = class AuthControler {
             maxAge: 15 * 60 * 1000,
         });
         return {
-            access_token
+            access_token,
         };
     }
 };

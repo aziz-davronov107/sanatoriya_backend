@@ -4,23 +4,31 @@ import { CoreModule } from './core/core.module/core.module';
 import { AuthModule } from './entities/auth/auth.module';
 import { AccessTokenGuard } from './core/guards/auth-guards';
 import { RolesGuard } from './core/guards/role-guards';
-import { ProfileModule } from './entities/profile/profile.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { AccommodationModule } from './entities/accommodation/accommodation.module';
-import { CategoryModule } from './entities/category/category.module';
+import { ProfilesModule } from './entities/profiles/profiles.module';
+import { RoomCategoriesModule } from './entities/room-categories/room-categories.module';
+import { RoomsModule } from './entities/rooms/rooms.module';
+import { PhotosModule } from './entities/photos/photos.module';
+import { OrdersModule } from './entities/orders/orders.module';
+import { ReviewsModule } from './entities/reviews/reviews.module';
+import { SeederModule } from './common/seeders/seeder.module';
 
 @Module({
   imports: [
     CoreModule,
     AuthModule,
-    ProfileModule,
-    AccommodationModule,
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'uploads'),
       serveRoot: '/static',
     }),
-    CategoryModule
+    ProfilesModule,
+    RoomCategoriesModule,
+    RoomsModule,
+    PhotosModule,
+    OrdersModule,
+    ReviewsModule,
+    SeederModule,
   ],
   providers: [
     {

@@ -23,8 +23,8 @@ async function bootstrap() {
     origin: 'http://localhost:5173',
     credentials: true,
   });
+  // use middleware
 
-  
   app.useGlobalPipes(
     new ValidationPipe({
       whitelist: true,
@@ -32,15 +32,16 @@ async function bootstrap() {
       forbidNonWhitelisted: true,
     }),
   );
-
   const config = new DocumentBuilder()
     .setTitle('Real Estate API')
-    .setDescription('Swagger docs for Users, Category, Accommodation, Likes, Rating, Contact')
+    .setDescription(
+      'Swagger docs for Users, Category, Accommodation, Likes, Rating, Contact',
+    )
     .setVersion('1.0')
     .build();
-    
+
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('swagger_vip_house', app, document);
+  SwaggerModule.setup('swagger', app, document);
 
   await app.listen(process.env.PORT || 3000);
 }

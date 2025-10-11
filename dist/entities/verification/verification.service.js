@@ -29,7 +29,8 @@ let VerificationService = class VerificationService {
         const subjects = {
             [verification_1.EverifationsTypes.REGISTER]: 'Ro‘yxatdan o‘tish tasdiqlash kodi',
             [verification_1.EverifationsTypes.EMAIL_PASSWORD]: 'Parolni tiklash kodi',
-            [verification_1.EverifationsTypes.EDIT_PHONE]: '',
+            [verification_1.EverifationsTypes.EDIT_PHONE]: 'Telefonni yangilash tasdiqlash kodi',
+            [verification_1.EverifationsTypes.LOGIN]: 'Kirish OTP kodi',
         };
         return subjects[type];
     }
@@ -44,7 +45,7 @@ let VerificationService = class VerificationService {
         <div style="font-size:24px; font-weight:700; letter-spacing:4px;">
           ${otp}
         </div>
-        <p style="color:#666">Kod 2 daqiqa ichida amal qiladi. Hech kimga bermang.</p>
+        <p style="color:#666">Kod 5 daqiqa ichida amal qiladi. Hech kimga bermang.</p>
       </div>
     `;
     }
@@ -64,7 +65,8 @@ let VerificationService = class VerificationService {
         const storeKeys = {
             [verification_1.EverifationsTypes.REGISTER]: 'reg_',
             [verification_1.EverifationsTypes.EMAIL_PASSWORD]: 'respass_',
-            [verification_1.EverifationsTypes.EDIT_PHONE]: '',
+            [verification_1.EverifationsTypes.EDIT_PHONE]: 'editphone_',
+            [verification_1.EverifationsTypes.LOGIN]: 'login_',
         };
         let key = storeKeys[type];
         if (confirmation)
@@ -74,32 +76,31 @@ let VerificationService = class VerificationService {
     }
     async sendOtp(payload) {
         const { type, email } = payload;
-        const typeEnum = type;
-        const key = this.getKey(typeEnum, email);
+        const key = this.getKey(type, email);
         const session = await this.redis.get(key);
         if (session) {
             throw new common_1.HttpException('Code already sent to user', common_1.HttpStatus.BAD_REQUEST);
         }
-        switch (typeEnum) {
+        switch (type) {
             case verification_1.EverifationsTypes.REGISTER:
                 await this.throwIfUserExists(email);
                 break;
             case verification_1.EverifationsTypes.EMAIL_PASSWORD:
+            case verification_1.EverifationsTypes.LOGIN:
                 await this.throwIfUserNotExists(email);
                 break;
         }
         const otp = (0, random_1.generateOtp)();
         await this.redis.set(key, JSON.stringify({ otp }), 300);
-        const subject = this.subject(typeEnum);
-        const text = this.textMessage(typeEnum, otp);
-        const html = this.htmlMessage(typeEnum, otp);
+        const subject = this.subject(type);
+        const text = this.textMessage(type, otp);
+        const html = this.htmlMessage(type, otp);
         await this.emailService.sendOtpCode(email, otp);
         return { message: 'Confirmation code sent!' };
     }
     async verifyOtp(payload) {
         const { type, email, otp } = payload;
-        const typeEnum = type;
-        const pendingKey = this.getKey(typeEnum, email);
+        const pendingKey = this.getKey(type, email);
         const session = await this.redis.get(pendingKey);
         if (!session) {
             throw new common_1.HttpException('OTP expired!', common_1.HttpStatus.BAD_REQUEST);
@@ -108,13 +109,12 @@ let VerificationService = class VerificationService {
             throw new common_1.HttpException('Invalid OTP', common_1.HttpStatus.BAD_REQUEST);
         }
         await this.redis.delete(pendingKey);
-        await this.redis.set(this.getKey(typeEnum, email, true), JSON.stringify({ otp }), 600);
+        await this.redis.set(this.getKey(type, email, true), JSON.stringify({ otp }), 600);
         return { success: true, message: 'Verified' };
     }
     async checkConfigOtp(payload) {
         const { type, email, otp } = payload;
-        const typeEnum = type;
-        const confirmKey = this.getKey(typeEnum, email, true);
+        const confirmKey = this.getKey(type, email, true);
         const session = await this.redis.get(confirmKey);
         if (!session) {
             throw new common_1.HttpException('OTP expired!', common_1.HttpStatus.BAD_REQUEST);

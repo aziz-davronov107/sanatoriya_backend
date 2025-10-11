@@ -13,14 +13,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.SeederService = void 0;
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../core/db/prisma.service");
-const client_1 = require("@prisma/client");
-const bcrypt = require("bcrypt");
-const categories = [
-    { name: 'Apartment', img: `${process.env.STATIC_URL}/categories/apartment.jpg`, iconImg: `${process.env.STATIC_URL}/icons/apartment.svg` },
-    { name: 'House', img: `${process.env.STATIC_URL}/categories/house.jpg`, iconImg: `${process.env.STATIC_URL}/icons/house.svg` },
-    { name: 'Villa', img: `${process.env.STATIC_URL}/categories/villa.jpg`, iconImg: `${process.env.STATIC_URL}/icons/villa.png` },
-    { name: 'Office', img: `${process.env.STATIC_URL}/categories/office.jpg`, iconImg: `${process.env.STATIC_URL}/icons/office.svg` },
-];
 let SeederService = SeederService_1 = class SeederService {
     prisma;
     logger = new common_1.Logger(SeederService_1.name);
@@ -30,7 +22,7 @@ let SeederService = SeederService_1 = class SeederService {
     async onModuleInit() {
         if ((process.env.SEED_ON_BOOT || 'false').toLowerCase() === 'true') {
             try {
-                await this.seedAll();
+                await this.seed();
                 this.logger.log('✅ Seeding completed');
             }
             catch (error) {
@@ -41,48 +33,30 @@ let SeederService = SeederService_1 = class SeederService {
             this.logger.log('⏭️  Seeding skipped (SEED_ON_BOOT is not true)');
         }
     }
-    async seedAll() {
-        await this.seedAdmin();
-        await this.seedCategories();
-    }
-    async seedAdmin() {
-        const email = process.env.ADMIN_EMAIL || 'admin@vip-house.uz';
-        const firstname = process.env.ADMIN_FIRSTNAME || 'Admin';
-        const lastname = process.env.ADMIN_LASTNAME || 'User';
-        const avatar = process.env.ADMIN_AVATAR || '/avatars/admin.png';
-        const plainPass = process.env.ADMIN_PASSWORD || 'Admin123!';
-        const saltRounds = 10;
-        const existing = await this.prisma.user.findUnique({ where: { email } });
-        const forceReset = (process.env.ADMIN_RESET_PASSWORD_ON_SEED || 'false').toLowerCase() === 'true';
-        if (!existing) {
-            const hash = await bcrypt.hash(plainPass, saltRounds);
-            await this.prisma.user.create({
-                data: { email, password: hash, firstname, lastname, role: client_1.UserRole.ADMIN, avatar },
-            });
-            this.logger.log(`👤 Admin created: ${email}`);
-            return;
-        }
-        await this.prisma.user.update({
-            where: { email },
-            data: {
-                firstname,
-                lastname,
-                role: client_1.UserRole.ADMIN,
-                avatar,
-                ...(forceReset
-                    ? { password: await bcrypt.hash(plainPass, saltRounds) }
-                    : {}),
+    async seed() {
+        this.logger.log('🌱 Running seeders...');
+        const categories = [
+            'Studio',
+            'One Bedroom',
+            'Two Bedroom',
+            'Penthouse',
+            'Deluxe',
+        ];
+        const existingCategories = await this.prisma.roomCategory.findMany({
+            where: {
+                title: {
+                    in: categories,
+                },
             },
         });
-        this.logger.log(`🔁 Admin ensured/updated: ${email}${forceReset ? ' (password rotated)' : ''}`);
-    }
-    async seedCategories() {
-        await Promise.all(categories.map((c) => this.prisma.category.upsert({
-            where: { name: c.name },
-            update: { img: c.img, iconImg: c.iconImg },
-            create: { name: c.name, img: c.img, iconImg: c.iconImg },
-        })));
-        this.logger.log('🏷️  Categories seeded/updated');
+        const existingTitles = existingCategories.map((cat) => cat.title);
+        const newCategories = categories.filter((title) => !existingTitles.includes(title));
+        if (newCategories.length > 0) {
+            await this.prisma.roomCategory.createMany({
+                data: newCategories.map((title) => ({ title })),
+            });
+        }
+        return;
     }
 };
 exports.SeederService = SeederService;

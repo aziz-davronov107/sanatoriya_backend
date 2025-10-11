@@ -1,1 +1,1 @@
-{"version":3,"file":"verification.js","sourceRoot":"","sources":["../../../src/common/types/verification.ts"],"names":[],"mappings":";;;AAAA,IAAY,iBAIX;AAJD,WAAY,iBAAiB;IAC3B,0CAAqB,CAAA;IACrB,mDAA8B,CAAA;IAC9B,8CAAyB,CAAA;AAC3B,CAAC,EAJW,iBAAiB,iCAAjB,iBAAiB,QAI5B"}
+{"version":3,"file":"verification.js","sourceRoot":"","sources":["../../../src/common/types/verification.ts"],"names":[],"mappings":";;;AAAA,IAAY,iBAKX;AALD,WAAY,iBAAiB;IAC3B,0CAAqB,CAAA;IACrB,mDAA8B,CAAA;IAC9B,8CAAyB,CAAA;IACzB,oCAAe,CAAA;AACjB,CAAC,EALW,iBAAiB,iCAAjB,iBAAiB,QAK5B"}

@@ -1,11 +1,16 @@
-import { ConflictException, HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/core/db/prisma.service';
 import { VerificationService } from '../verification/verification.service';
 import * as bcrypt from 'bcrypt';
 import { CreateDto, LoginDto } from './dto/auth.dto';
 import { EverifationsTypes } from 'src/common/types/verification';
-
+import { UserRole } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
@@ -14,7 +19,7 @@ export class AuthService {
     private jwtService: JwtService,
     private verificationService: VerificationService,
   ) {}
-  async getToken(id: string, isTrue?: boolean) {
+  async getToken(id: number, isTrue?: boolean) {
     let isRefresh = {
       secret: process.env.JWT_REFRESH_SECRET || 'yandiev',
       expiresIn: '7d',
@@ -31,51 +36,55 @@ export class AuthService {
   }
 
   async register(payload: CreateDto) {
+    const { email, otp } = payload;
     await this.verificationService.checkConfigOtp({
+      email,
       type: EverifationsTypes.REGISTER,
-      gmail: payload.email, // ICheckOtp uchun
-      otp: payload.otp,
-      email: payload.email,
+      otp,
     });
-
-    let { email, password, firstname, lastname } = payload;
     const exists = await this.prisma.user.findUnique({
       where: { email },
     });
     if (exists) {
       throw new ConflictException('User already exists');
     }
-    let hash = await bcrypt.hash(password, 10);
     const new_user = await this.prisma.user.create({
       data: {
         email,
-        password: hash,
-        firstname,
-        lastname,
-        role: 'USER',
-        avatar: '',
+      },
+    });
+
+    const profile = await this.prisma.profile.create({
+      data: {
+        role: UserRole.USER,
+        userId: new_user.id,
       },
     });
 
     const token = await this.getToken(new_user.id);
-    console.log(token)
+    console.log(token);
     return token;
   }
 
   async login(payload: LoginDto) {
+    const { email, otp } = payload;
+    // await this.verificationService.checkConfigOtp({email,type:EverifationsTypes.LOGIN,otp})
     let user = await this.prisma.user.findUnique({
       where: { email: payload.email },
     });
-    if (!user || !(await bcrypt.compare(payload.password, user.password))) {
-      throw new HttpException(
-        'Email or password incorrect',
-        HttpStatus.BAD_REQUEST,
-      );
+    if (!user) {
+      throw new ConflictException('User not Found!');
+    }
+    const profile = await this.prisma.profile.findUnique({
+      where: { userId: user.id, isDisabled: false },
+    });
+    if (!profile) {
+      throw new ConflictException('Profile not Found!');
     }
     const token = await this.getToken(user.id);
     return token;
   }
-  async refresh_token(id: string) {
+  async refresh_token(id: number) {
     const token = await this.getToken(id, true);
     return token;
   }

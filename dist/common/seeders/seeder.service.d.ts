@@ -5,7 +5,5 @@ export declare class SeederService implements OnModuleInit {
     private readonly logger;
     constructor(prisma: PrismaService);
     onModuleInit(): Promise<void>;
-    seedAll(): Promise<void>;
-    private seedAdmin;
-    private seedCategories;
+    seed(): Promise<void>;
 }

@@ -7,7 +7,7 @@ export declare class AuthService {
     private jwtService;
     private verificationService;
     constructor(prisma: PrismaService, jwtService: JwtService, verificationService: VerificationService);
-    getToken(id: string, isTrue?: boolean): Promise<{
+    getToken(id: number, isTrue?: boolean): Promise<{
         access_token: string;
         refresh_token: string;
     } | {
@@ -28,7 +28,7 @@ export declare class AuthService {
         access_token: string;
         refresh_token?: undefined;
     }>;
-    refresh_token(id: string): Promise<{
+    refresh_token(id: number): Promise<{
         access_token: string;
         refresh_token: string;
     } | {

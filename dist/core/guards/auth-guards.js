@@ -22,7 +22,8 @@ let AccessTokenGuard = class AccessTokenGuard extends (0, passport_1.AuthGuard)(
     }
     async canActivate(context) {
         const isPublic = this.reflector.getAllAndOverride(publick_decorator_1.PUBLIC, [
-            context.getHandler(), context.getClass(),
+            context.getHandler(),
+            context.getClass(),
         ]);
         if (isPublic)
             return true;

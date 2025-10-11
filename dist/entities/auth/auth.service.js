@@ -14,8 +14,8 @@ const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const prisma_service_1 = require("../../core/db/prisma.service");
 const verification_service_1 = require("../verification/verification.service");
-const bcrypt = require("bcrypt");
 const verification_1 = require("../../common/types/verification");
+const client_1 = require("@prisma/client");
 let AuthService = class AuthService {
     prisma;
     jwtService;
@@ -41,28 +41,27 @@ let AuthService = class AuthService {
         };
     }
     async register(payload) {
+        const { email, otp } = payload;
         await this.verificationService.checkConfigOtp({
+            email,
             type: verification_1.EverifationsTypes.REGISTER,
-            gmail: payload.email,
-            otp: payload.otp,
-            email: payload.email,
+            otp,
         });
-        let { email, password, firstname, lastname } = payload;
         const exists = await this.prisma.user.findUnique({
             where: { email },
         });
         if (exists) {
             throw new common_1.ConflictException('User already exists');
         }
-        let hash = await bcrypt.hash(password, 10);
         const new_user = await this.prisma.user.create({
             data: {
                 email,
-                password: hash,
-                firstname,
-                lastname,
-                role: 'USER',
-                avatar: '',
+            },
+        });
+        const profile = await this.prisma.profile.create({
+            data: {
+                role: client_1.UserRole.USER,
+                userId: new_user.id,
             },
         });
         const token = await this.getToken(new_user.id);
@@ -70,11 +69,18 @@ let AuthService = class AuthService {
         return token;
     }
     async login(payload) {
+        const { email, otp } = payload;
         let user = await this.prisma.user.findUnique({
             where: { email: payload.email },
         });
-        if (!user || !(await bcrypt.compare(payload.password, user.password))) {
-            throw new common_1.HttpException('Email or password incorrect', common_1.HttpStatus.BAD_REQUEST);
+        if (!user) {
+            throw new common_1.ConflictException('User not Found!');
+        }
+        const profile = await this.prisma.profile.findUnique({
+            where: { userId: user.id, isDisabled: false },
+        });
+        if (!profile) {
+            throw new common_1.ConflictException('Profile not Found!');
         }
         const token = await this.getToken(user.id);
         return token;

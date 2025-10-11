@@ -5,11 +5,14 @@ import { PUBLIC } from '../decorators/publick.decorator'; // agar @Public() ishl
 
 @Injectable()
 export class AccessTokenGuard extends AuthGuard('access-jwt') {
-  constructor(private reflector: Reflector) { super(); }
+  constructor(private reflector: Reflector) {
+    super();
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const isPublic = this.reflector.getAllAndOverride<boolean>(PUBLIC, [
-      context.getHandler(), context.getClass(),
+      context.getHandler(),
+      context.getClass(),
     ]);
     if (isPublic) return true;
     return (await super.canActivate(context)) as boolean;

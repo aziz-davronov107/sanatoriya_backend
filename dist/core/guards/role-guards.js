@@ -21,12 +21,14 @@ let RolesGuard = class RolesGuard {
     }
     canActivate(context) {
         const isPublic = this.reflector.getAllAndOverride(publick_decorator_1.PUBLIC, [
-            context.getHandler(), context.getClass(),
+            context.getHandler(),
+            context.getClass(),
         ]);
         if (isPublic)
             return true;
         const requiredRoles = this.reflector.getAllAndOverride(role_decorator_1.ROLES_KEY, [
-            context.getHandler(), context.getClass(),
+            context.getHandler(),
+            context.getClass(),
         ]) || [];
         if (requiredRoles.length === 0)
             return true;

@@ -36,11 +36,14 @@ let AccessJwtStrategy = class AccessJwtStrategy extends (0, passport_1.PassportS
             throw new common_1.UnauthorizedException('Invalid token payload');
         const user = await this.prisma.user.findUnique({
             where: { id: userId },
-            select: { id: true, email: true, firstname: true, lastname: true, role: true, avatar: true },
+            select: { id: true, email: true },
         });
         if (!user)
             throw new common_1.UnauthorizedException('User not found');
-        return user;
+        const profile = await this.prisma.profile.findUnique({
+            where: { userId },
+        });
+        return { ...user, role: profile.role };
     }
 };
 exports.AccessJwtStrategy = AccessJwtStrategy;

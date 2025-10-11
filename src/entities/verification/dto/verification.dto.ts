@@ -3,16 +3,17 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsEmail, IsString, Length, Matches } from 'class-validator';
 import { EverifationsTypes } from 'src/common/types/verification';
 
-// Faqat 2 tur qoldi
-export enum LimitedVerificationTypes {
-  REGISTER = EverifationsTypes.REGISTER,
-  EMAIL_PASSWORD = EverifationsTypes.EMAIL_PASSWORD,
-}
+// Faqat docs uchun (enum EMAS)
+export const LimitedVerificationTypes = {
+  REGISTER: EverifationsTypes.REGISTER,
+  EMAIL_PASSWORD: EverifationsTypes.EMAIL_PASSWORD,
+  LOGIN: EverifationsTypes.LOGIN,
+} as const;
 
 export class SendOtpDto {
-  @ApiProperty({ enum: LimitedVerificationTypes })
-  @IsEnum(LimitedVerificationTypes)
-  type: LimitedVerificationTypes;
+  @ApiProperty({ enum: EverifationsTypes }) // <-- Swagger’da ham shu ko‘rinsin
+  @IsEnum(EverifationsTypes) // <-- Validatsiya ham shu enumga qaraydi
+  type: EverifationsTypes; // <-- Asosiy fix
 
   @ApiProperty({ example: 'user@example.com' })
   @IsEmail()

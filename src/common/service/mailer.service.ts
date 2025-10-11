@@ -51,7 +51,9 @@ export class EmailService {
       });
     } catch (err) {
       console.log('EMAIL ERROR:', err);
-      throw new InternalServerErrorException('Email yuborishda xatolik yuz berdi');
+      throw new InternalServerErrorException(
+        'Email yuborishda xatolik yuz berdi',
+      );
     }
   }
 }

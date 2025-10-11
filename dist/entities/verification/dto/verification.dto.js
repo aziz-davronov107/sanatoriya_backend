@@ -12,19 +12,20 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.VerifyOtpDto = exports.SendOtpDto = exports.LimitedVerificationTypes = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
-var LimitedVerificationTypes;
-(function (LimitedVerificationTypes) {
-    LimitedVerificationTypes["REGISTER"] = "register";
-    LimitedVerificationTypes["EMAIL_PASSWORD"] = "reset_email";
-})(LimitedVerificationTypes || (exports.LimitedVerificationTypes = LimitedVerificationTypes = {}));
+const verification_1 = require("../../../common/types/verification");
+exports.LimitedVerificationTypes = {
+    REGISTER: verification_1.EverifationsTypes.REGISTER,
+    EMAIL_PASSWORD: verification_1.EverifationsTypes.EMAIL_PASSWORD,
+    LOGIN: verification_1.EverifationsTypes.LOGIN,
+};
 class SendOtpDto {
     type;
     email;
 }
 exports.SendOtpDto = SendOtpDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({ enum: LimitedVerificationTypes }),
-    (0, class_validator_1.IsEnum)(LimitedVerificationTypes),
+    (0, swagger_1.ApiProperty)({ enum: verification_1.EverifationsTypes }),
+    (0, class_validator_1.IsEnum)(verification_1.EverifationsTypes),
     __metadata("design:type", String)
 ], SendOtpDto.prototype, "type", void 0);
 __decorate([

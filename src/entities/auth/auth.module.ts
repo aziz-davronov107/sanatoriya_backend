@@ -3,7 +3,6 @@ import { AuthService } from './auth.service';
 import { AuthControler } from './auth.controler';
 import { VerificationModule } from '../verification/verification.module';
 
-
 @Module({
   imports: [VerificationModule],
   controllers: [AuthControler],

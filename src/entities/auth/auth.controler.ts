@@ -1,5 +1,13 @@
 import { AuthService } from './auth.service';
-import { Controller, Post, Req, Res, UseGuards, Body, Get } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+  Body,
+  Get,
+} from '@nestjs/common';
 import { CreateDto, LoginDto } from './dto/auth.dto';
 import { Response } from 'express';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
@@ -19,7 +27,10 @@ export class AuthControler {
   @Post('register')
   @ApiBody({ type: CreateDto })
   @Public()
-  async register(@Body() data: CreateDto, @Res({ passthrough: true }) res: Response) {
+  async register(
+    @Body() data: CreateDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     let token = await this.authService.register(data);
     let { access_token, refresh_token } = token;
     res.cookie('access-token', access_token, {
@@ -40,7 +51,10 @@ export class AuthControler {
   @Post('login')
   @ApiBody({ type: LoginDto })
   @Public()
-  async login(@Res({ passthrough: true }) res: Response,@Body() data: LoginDto) {
+  async login(
+    @Res({ passthrough: true }) res: Response,
+    @Body() data: LoginDto,
+  ) {
     let token = await this.authService.login(data);
 
     let { access_token, refresh_token } = token;
@@ -57,9 +71,10 @@ export class AuthControler {
       secure: false,
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
-     return {
-      access_token,refresh_token
-     }
+    return {
+      access_token,
+      refresh_token,
+    };
   }
   @Post('refresh')
   @UseGuards(RefreshTokenGuard)
@@ -70,14 +85,14 @@ export class AuthControler {
   ) {
     let token = await this.authService.refresh_token((req as any).user.id);
     let { access_token } = token;
-     res.cookie('access-token', access_token, {
+    res.cookie('access-token', access_token, {
       httpOnly: true,
       sameSite: 'strict',
       secure: false,
       maxAge: 15 * 60 * 1000,
     });
     return {
-      access_token
-    }
+      access_token,
+    };
   }
 }

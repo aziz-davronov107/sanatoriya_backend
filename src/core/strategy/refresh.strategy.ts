@@ -9,7 +9,10 @@ function cookieExtractor(req: Request) {
 }
 
 @Injectable()
-export class RefreshJwtStrategy extends PassportStrategy(Strategy, 'refresh-jwt') {
+export class RefreshJwtStrategy extends PassportStrategy(
+  Strategy,
+  'refresh-jwt',
+) {
   constructor(private prisma: PrismaService) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
@@ -27,10 +30,14 @@ export class RefreshJwtStrategy extends PassportStrategy(Strategy, 'refresh-jwt'
 
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, email: true, firstname: true, lastname: true, role: true, avatar: true },
+      select: { id: true, email: true },
     });
-    if (!user) throw new UnauthorizedException('User not found');
 
-    return user; // req.user ga tushadi
+    if (!user) throw new UnauthorizedException('User not found');
+    const profile = await this.prisma.profile.findUnique({
+      where: { userId },
+    });
+
+    return { ...user, role: profile!.role }; // req.user ga tushadi
   }
 }

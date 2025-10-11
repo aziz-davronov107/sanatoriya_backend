@@ -10,7 +10,6 @@ import { AccessTokenGuard } from '../guards/auth-guards';
 import { EmailService } from 'src/common/service/mailer.service';
 import { SeederModule } from '../../common/seeders/seeder.module';
 
-
 @Global()
 @Module({
   imports: [
@@ -30,6 +29,12 @@ import { SeederModule } from '../../common/seeders/seeder.module';
     RefreshTokenGuard,
     RefreshJwtStrategy,
   ],
-  exports: [PassportModule, PrismaModule, JwtModule, EmailService, MyRedisModel],
+  exports: [
+    PassportModule,
+    PrismaModule,
+    JwtModule,
+    EmailService,
+    MyRedisModel,
+  ],
 })
 export class CoreModule {}
