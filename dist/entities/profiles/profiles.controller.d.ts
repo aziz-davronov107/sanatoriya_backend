@@ -5,12 +5,12 @@ export declare class ProfilesController {
     constructor(profilesService: ProfilesService);
     findAll(): Promise<{
         id: number;
+        userId: number;
         role: import(".prisma/client").$Enums.UserRole;
         imageUrl: string | null;
         fullName: string | null;
         address: string | null;
         isDisabled: boolean | null;
-        userId: number;
     }[]>;
     findOne(req: any): Promise<{
         user: {
@@ -24,23 +24,23 @@ export declare class ProfilesController {
             email?: string | undefined;
         };
         id: number;
+        userId: number;
         role: import(".prisma/client").$Enums.UserRole;
         imageUrl: string | null;
         fullName: string | null;
         address: string | null;
         isDisabled: boolean | null;
-        userId: number;
     } | null>;
     update(req: any, updateProfileDto: UpdateProfileDto, file?: Express.Multer.File): Promise<{
         message: string;
     }>;
     remove(id: number): Promise<{
         id: number;
+        userId: number;
         role: import(".prisma/client").$Enums.UserRole;
         imageUrl: string | null;
         fullName: string | null;
         address: string | null;
         isDisabled: boolean | null;
-        userId: number;
     }>;
 }

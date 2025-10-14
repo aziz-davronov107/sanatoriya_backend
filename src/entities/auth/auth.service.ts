@@ -68,7 +68,7 @@ export class AuthService {
 
   async login(payload: LoginDto) {
     const { email, otp } = payload;
-    // await this.verificationService.checkConfigOtp({email,type:EverifationsTypes.LOGIN,otp})
+    await this.verificationService.checkConfigOtp({email,type:EverifationsTypes.LOGIN,otp})
     let user = await this.prisma.user.findUnique({
       where: { email: payload.email },
     });

@@ -5,21 +5,21 @@ export declare class ReviewsController {
     private readonly reviewsService;
     constructor(reviewsService: ReviewsService);
     create(createReviewDto: CreateReviewDto, file: Express.Multer.File, req: any): Promise<{
-        description: string;
-        url: string;
         id: number;
         userId: number;
+        description: string;
+        url: string;
     }>;
     update(id: number, updateReviewDto: UpdateReviewDto, file: Express.Multer.File, req: any): Promise<{
-        description: string;
-        url: string;
         id: number;
         userId: number;
+        description: string;
+        url: string;
     }>;
     findOne(id: number): Promise<{
-        description: string;
-        url: string;
         id: number;
         userId: number;
+        description: string;
+        url: string;
     }>;
 }

@@ -5,34 +5,34 @@ export declare class ReviewsService {
     private readonly prisma;
     constructor(prisma: PrismaService);
     create(createReviewDto: CreateReviewDto, url: string | undefined, userId: number): Promise<{
-        description: string;
-        url: string;
         id: number;
         userId: number;
+        description: string;
+        url: string;
     }>;
     findAll(): import(".prisma/client").Prisma.PrismaPromise<{
-        description: string;
-        url: string;
         id: number;
         userId: number;
+        description: string;
+        url: string;
     }[]>;
     findOne(id: number): Promise<{
-        description: string;
-        url: string;
         id: number;
         userId: number;
+        description: string;
+        url: string;
     }>;
     update(id: number, updateReviewDto: UpdateReviewDto, url: string | undefined, userId: number): Promise<{
-        description: string;
-        url: string;
         id: number;
         userId: number;
+        description: string;
+        url: string;
     }>;
     remove(id: number): Promise<{
-        description: string;
-        url: string;
         id: number;
         userId: number;
+        description: string;
+        url: string;
     }>;
     private publicUrlToLocalPath;
 }
