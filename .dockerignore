@@ -3,7 +3,7 @@ dist
 .git
 .vscode
 uploads
-*.log
+*log
 npm-debug.log*
 docker-compose.yml
 Dockerfile

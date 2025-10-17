@@ -19,7 +19,11 @@ async function bootstrap() {
       legacyHeaders: false,
     }),
   );
-  app.enableCors();
+  app.enableCors(
+    {
+      origin: true,
+    }
+  );
   // use middleware
 
   app.useGlobalPipes(
