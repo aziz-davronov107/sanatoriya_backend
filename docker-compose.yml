@@ -11,8 +11,9 @@ services:
       - "5432:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
+    
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d premium"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d yettibuloq"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -38,14 +39,8 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-    environment:
-      NODE_ENV: production
-      DATABASE_URL: postgresql://postgres:postgres@db:5432/premium?schema=public
-      REDIS_URL: redis://redis:6379
-      RUN_MIGRATIONS: "true"     # "false" qilsa bo'ladi
-      SEED_ON_BOOT: "false"      # package.json da "seed" bo'lsa true qilasiz
-      # Tashqaridan kirilsa "localhost" emas, server IP yoki domen bering:
-      STATIC_URL: http://YOUR-SERVER-IP:3000/static
+    env_file:
+      - .env
     ports:
       - "3000:3000"
     volumes:
