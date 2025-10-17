@@ -19,10 +19,7 @@ async function bootstrap() {
       legacyHeaders: false,
     }),
   );
-  app.enableCors({
-    origin: 'http://localhost:5173',
-    credentials: true,
-  });
+  app.enableCors();
   // use middleware
 
   app.useGlobalPipes(
@@ -31,6 +28,7 @@ async function bootstrap() {
       transform: true,
       forbidNonWhitelisted: true,
     }),
+    
   );
   const config = new DocumentBuilder()
     .setTitle('Real Estate API')
