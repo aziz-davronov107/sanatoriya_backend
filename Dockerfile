@@ -1,30 +1,38 @@
-## Multi-stage Dockerfile for NestJS + Prisma
+# ---- Build stage ----
 FROM node:18-alpine AS builder
 WORKDIR /app
 
-# install dependencies
-COPY package.json package-lock.json* ./
-RUN npm install --production=false --silent
+# Build tools (kerak bo'lsa)
+RUN apk add --no-cache python3 make g++ openssl
 
-# copy sources
-COPY prisma ./prisma
-COPY tsconfig*.json ./
+# Dep'larni cache-friendly o'rnatish
+COPY package*.json ./
+# CI/servers uchun eng barqaror: npm ci
+RUN npm ci --legacy-peer-deps
+
+# Source
 COPY . .
-
-# generate Prisma client and build
+# Prisma client va build
 RUN npx prisma generate
 RUN npm run build
 
-## Runner image
-FROM node:18-alpine AS runner
+# ---- Runtime stage ----
+FROM node:18-alpine
 WORKDIR /app
 ENV NODE_ENV=production
 
-# copy production node_modules and build artifacts
-COPY --from=builder /app/package.json ./package.json
+# Minimal paketlar (ixtiyoriy): tini ishlatmasak ham bo'ladi
+RUN adduser -D appuser
+
+# Runtime fayllar
+COPY --from=builder /app/package*.json ./
+# Prisma CLI ishlashi uchun node_modules to'liq olib o'tamiz
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/prisma ./prisma
+COPY --from=builder /app/uploads ./uploads
 
+USER appuser
 EXPOSE 3000
-CMD ["node", "dist/main"]
+# main.js ga to'g'rilandi
+CMD ["node", "dist/main.js"]

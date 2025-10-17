@@ -1,39 +1,70 @@
-version: '3.8'
+name: sanatoriya_backend
+
 services:
   db:
     image: postgres:15
-    restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: premium
+      POSTGRES_DB: yettibuloq
+    ports:
+      - "5432:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
-    ports:
-      - '5432:5432'
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d premium"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
 
   redis:
-    image: redis:7
-    restart: always
+    image: redis:7-alpine
     ports:
-      - '6379:6379'
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
 
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     environment:
-      DATABASE_URL: 'postgresql://postgres:postgres@db:5432/premium?schema=public'
-      REDIS_URL: 'redis://redis:6379'
-      NODE_ENV: development
-      SEED_ON_BOOT: 'true'
-      STATIC_URL: 'http://localhost:3000/static'
+      NODE_ENV: production
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/premium?schema=public
+      REDIS_URL: redis://redis:6379
+      RUN_MIGRATIONS: "true"     # "false" qilsa bo'ladi
+      SEED_ON_BOOT: "false"      # package.json da "seed" bo'lsa true qilasiz
+      # Tashqaridan kirilsa "localhost" emas, server IP yoki domen bering:
+      STATIC_URL: http://YOUR-SERVER-IP:3000/static
     ports:
-      - '3000:3000'
+      - "3000:3000"
     volumes:
-      - ./:/app:cached
+      # Faqat foydalanuvchi fayllari
       - ./uploads:/app/uploads
+    restart: unless-stopped
+    # entrypoint o'rniga: migrate -> (ixtiyoriy) seed -> start
+    command: >
+      sh -lc '
+        if [ "$RUN_MIGRATIONS" = "true" ]; then
+          echo "Running Prisma migrations...";
+          npx prisma migrate deploy || exit 1;
+          if [ "$SEED_ON_BOOT" = "true" ]; then
+            echo "Seeding database..."; npm run seed || echo "Seed skipped";
+          fi
+        fi;
+        echo "Starting app...";
+        node dist/main.js
+      '
 
 volumes:
   db-data:
