@@ -9,6 +9,8 @@ import {
   Get,
 } from '@nestjs/common';
 import { CreateDto } from './dto/auth.dto';
+import { CheckEmailDto } from './dto/check-email.dto';
+import { CheckPhoneDto } from './dto/check-phone.dto';
 import { Response } from 'express';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/core/decorators/publick.decorator';
@@ -70,13 +72,15 @@ export class AuthControler {
   }
   @Post('check-phone')
   @Public()
-  async isCheckPhone(@Body() data: { phone: string }) {
+  @ApiBody({ type: CheckPhoneDto })
+  async isCheckPhone(@Body() data: CheckPhoneDto) {
     return this.authService.isCheckPhone(data);
   }
 
-   @Post('check-email')
+  @Post('check-email')
   @Public()
-  async isCheckEmail(@Body() data: { email: string }) {
+  @ApiBody({ type: CheckEmailDto })
+  async isCheckEmail(@Body() data: CheckEmailDto) {
     return this.authService.isCheckEmail(data);
   }
 
