@@ -20,7 +20,6 @@ export class VerificationService {
       [EverifationsTypes.REGISTER]: 'Ro‘yxatdan o‘tish tasdiqlash kodi',
       [EverifationsTypes.EMAIL_PASSWORD]: 'Parolni tiklash kodi',
       [EverifationsTypes.EDIT_PHONE]: 'Telefonni yangilash tasdiqlash kodi',
-      [EverifationsTypes.LOGIN]: 'Kirish OTP kodi',
     };
     return subjects[type];
   }
@@ -65,7 +64,6 @@ export class VerificationService {
       [EverifationsTypes.REGISTER]: 'reg_',
       [EverifationsTypes.EMAIL_PASSWORD]: 'respass_',
       [EverifationsTypes.EDIT_PHONE]: 'editphone_',
-      [EverifationsTypes.LOGIN]: 'login_',
     };
     let key = storeKeys[type];
     if (confirmation) key += 'cfm_';
@@ -91,7 +89,6 @@ export class VerificationService {
         await this.throwIfUserExists(email); // registerda bo‘lmasligi kerak
         break;
       case EverifationsTypes.EMAIL_PASSWORD:
-      case EverifationsTypes.LOGIN:
         await this.throwIfUserNotExists(email); // bu holatlarda bo‘lishi shart
         break;
     }

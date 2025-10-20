@@ -8,7 +8,7 @@ import {
   Body,
   Get,
 } from '@nestjs/common';
-import { CreateDto, LoginDto } from './dto/auth.dto';
+import { CreateDto } from './dto/auth.dto';
 import { Response } from 'express';
 import { ApiBody, ApiTags } from '@nestjs/swagger';
 import { Public } from 'src/core/decorators/publick.decorator';
@@ -48,34 +48,7 @@ export class AuthControler {
     });
   }
 
-  @Post('login')
-  @ApiBody({ type: LoginDto })
-  @Public()
-  async login(
-    @Res({ passthrough: true }) res: Response,
-    @Body() data: LoginDto,
-  ) {
-    let token = await this.authService.login(data);
-
-    let { access_token, refresh_token } = token;
-    res.cookie('access-token', access_token, {
-      httpOnly: true,
-      sameSite: 'strict',
-      secure: false,
-      maxAge: 15 * 60 * 1000,
-    });
-
-    res.cookie('refresh-token', refresh_token, {
-      httpOnly: true,
-      sameSite: 'strict',
-      secure: false,
-      maxAge: 7 * 24 * 60 * 60 * 1000,
-    });
-    return {
-      access_token,
-      refresh_token,
-    };
-  }
+  
   @Post('refresh')
   @UseGuards(RefreshTokenGuard)
   @Public()
@@ -95,4 +68,16 @@ export class AuthControler {
       access_token,
     };
   }
+  @Post('check-phone')
+  @Public()
+  async isCheckPhone(@Body() data: { phone: string }) {
+    return this.authService.isCheckPhone(data);
+  }
+
+   @Post('check-email')
+  @Public()
+  async isCheckEmail(@Body() data: { email: string }) {
+    return this.authService.isCheckEmail(data);
+  }
+
 }

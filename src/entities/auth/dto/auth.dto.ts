@@ -21,18 +21,3 @@ export class CreateDto {
   @IsNotEmpty()
   otp!: string;
 }
-
-export class LoginDto {
-  @ApiProperty({
-    description: 'Email',
-    example: 'user@example.com',
-    required: true,
-  })
-  @IsEmail()
-  email: string;
-
-  @ApiProperty({ description: 'Tasdiqlash kodi (OTP)', example: '123456' })
-  @IsString()
-  @IsNotEmpty()
-  otp!: string;
-}

@@ -2,7 +2,6 @@ export enum EverifationsTypes {
   REGISTER = 'register',
   EMAIL_PASSWORD = 'reset_email',
   EDIT_PHONE = 'edit_phone',
-  LOGIN = 'login',
 }
 
 export interface ICheckOtp {
