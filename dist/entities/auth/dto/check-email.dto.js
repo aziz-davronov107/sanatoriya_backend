@@ -9,27 +9,17 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateDto = void 0;
+exports.CheckEmailDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
-class CreateDto {
+class CheckEmailDto {
     email;
-    otp;
 }
-exports.CreateDto = CreateDto;
+exports.CheckEmailDto = CheckEmailDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({
-        description: 'Email',
-        example: 'user@example.com',
-        required: true,
-    }),
+    (0, swagger_1.ApiProperty)({ example: 'user@example.com' }),
     (0, class_validator_1.IsEmail)(),
-    __metadata("design:type", String)
-], CreateDto.prototype, "email", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Tasdiqlash kodi (OTP)', example: '123456' }),
-    (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
     __metadata("design:type", String)
-], CreateDto.prototype, "otp", void 0);
-//# sourceMappingURL=auth.dto.js.map
+], CheckEmailDto.prototype, "email", void 0);
+//# sourceMappingURL=check-email.dto.js.map

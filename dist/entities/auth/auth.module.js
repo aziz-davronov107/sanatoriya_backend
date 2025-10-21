@@ -11,14 +11,16 @@ const common_1 = require("@nestjs/common");
 const auth_service_1 = require("./auth.service");
 const auth_controler_1 = require("./auth.controler");
 const verification_module_1 = require("../verification/verification.module");
+const telegram_strategy_ts_1 = require("./strategies/telegram.strategy.ts/telegram.strategy.ts");
+const passport_1 = require("@nestjs/passport");
 let AuthModule = class AuthModule {
 };
 exports.AuthModule = AuthModule;
 exports.AuthModule = AuthModule = __decorate([
     (0, common_1.Module)({
-        imports: [verification_module_1.VerificationModule],
+        imports: [verification_module_1.VerificationModule, passport_1.PassportModule.register({ session: false })],
         controllers: [auth_controler_1.AuthControler],
-        providers: [auth_service_1.AuthService],
+        providers: [auth_service_1.AuthService, telegram_strategy_ts_1.TelegramStrategy],
     })
 ], AuthModule);
 //# sourceMappingURL=auth.module.js.map

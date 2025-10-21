@@ -21,7 +21,9 @@ export declare class ProfilesService {
                 url: string;
             }[];
             id?: number | undefined;
-            email?: string | undefined;
+            email?: string | null | undefined;
+            phone?: string | null | undefined;
+            telegramChatId?: string | null | undefined;
         };
         id: number;
         userId: number;

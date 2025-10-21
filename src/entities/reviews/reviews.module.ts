@@ -19,7 +19,9 @@ import { extname } from 'path/win32';
       fileFilter: (req, file, cb) => {
         const ext = extname(file.originalname).toLowerCase();
         const isMp4Ext = ext === '.mp4';
-        const isVideoMime = typeof file.mimetype === 'string' && file.mimetype.startsWith('video/');
+        const isVideoMime =
+          typeof file.mimetype === 'string' &&
+          file.mimetype.startsWith('video/');
 
         if (isMp4Ext || isVideoMime) {
           cb(null, true);

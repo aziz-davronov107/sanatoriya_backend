@@ -2,7 +2,6 @@ import { EverifationsTypes } from 'src/common/types/verification';
 export declare const LimitedVerificationTypes: {
     readonly REGISTER: EverifationsTypes.REGISTER;
     readonly EMAIL_PASSWORD: EverifationsTypes.EMAIL_PASSWORD;
-    readonly LOGIN: EverifationsTypes.LOGIN;
 };
 export declare class SendOtpDto {
     type: EverifationsTypes;

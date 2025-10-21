@@ -53,7 +53,7 @@ export class ReviewsService {
     userId: number,
   ) {
     const existing = await this.prisma.review.findUnique({
-      where: { id ,userId},
+      where: { id, userId },
     });
 
     if (!existing) {

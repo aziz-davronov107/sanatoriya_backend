@@ -6,7 +6,7 @@ export declare class RefreshJwtStrategy extends RefreshJwtStrategy_base {
     validate(payload: any): Promise<{
         role: import(".prisma/client").$Enums.UserRole;
         id: number;
-        email: string;
+        email: string | null;
     }>;
 }
 export {};

@@ -21,7 +21,7 @@ export declare class OrdersController {
                 fullName: string | null;
             } | null;
             id: number;
-            email: string;
+            email: string | null;
         };
         room: {
             id: number;
@@ -54,7 +54,7 @@ export declare class OrdersController {
                 fullName: string | null;
             } | null;
             id: number;
-            email: string;
+            email: string | null;
         };
         room: {
             id: number;

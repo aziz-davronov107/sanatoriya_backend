@@ -6,6 +6,5 @@ var EverifationsTypes;
     EverifationsTypes["REGISTER"] = "register";
     EverifationsTypes["EMAIL_PASSWORD"] = "reset_email";
     EverifationsTypes["EDIT_PHONE"] = "edit_phone";
-    EverifationsTypes["LOGIN"] = "login";
 })(EverifationsTypes || (exports.EverifationsTypes = EverifationsTypes = {}));
 //# sourceMappingURL=verification.js.map

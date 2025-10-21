@@ -9,27 +9,18 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CreateDto = void 0;
+exports.CheckPhoneDto = void 0;
 const swagger_1 = require("@nestjs/swagger");
 const class_validator_1 = require("class-validator");
-class CreateDto {
-    email;
-    otp;
+class CheckPhoneDto {
+    phone;
 }
-exports.CreateDto = CreateDto;
+exports.CheckPhoneDto = CheckPhoneDto;
 __decorate([
-    (0, swagger_1.ApiProperty)({
-        description: 'Email',
-        example: 'user@example.com',
-        required: true,
-    }),
-    (0, class_validator_1.IsEmail)(),
-    __metadata("design:type", String)
-], CreateDto.prototype, "email", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)({ description: 'Tasdiqlash kodi (OTP)', example: '123456' }),
+    (0, swagger_1.ApiProperty)({ example: '+998901234567' }),
     (0, class_validator_1.IsString)(),
     (0, class_validator_1.IsNotEmpty)(),
+    (0, class_validator_1.Matches)(/^\+?[0-9]{8,15}$/),
     __metadata("design:type", String)
-], CreateDto.prototype, "otp", void 0);
-//# sourceMappingURL=auth.dto.js.map
+], CheckPhoneDto.prototype, "phone", void 0);
+//# sourceMappingURL=check-phone.dto.js.map

@@ -30,7 +30,6 @@ let VerificationService = class VerificationService {
             [verification_1.EverifationsTypes.REGISTER]: 'Ro‘yxatdan o‘tish tasdiqlash kodi',
             [verification_1.EverifationsTypes.EMAIL_PASSWORD]: 'Parolni tiklash kodi',
             [verification_1.EverifationsTypes.EDIT_PHONE]: 'Telefonni yangilash tasdiqlash kodi',
-            [verification_1.EverifationsTypes.LOGIN]: 'Kirish OTP kodi',
         };
         return subjects[type];
     }
@@ -66,7 +65,6 @@ let VerificationService = class VerificationService {
             [verification_1.EverifationsTypes.REGISTER]: 'reg_',
             [verification_1.EverifationsTypes.EMAIL_PASSWORD]: 'respass_',
             [verification_1.EverifationsTypes.EDIT_PHONE]: 'editphone_',
-            [verification_1.EverifationsTypes.LOGIN]: 'login_',
         };
         let key = storeKeys[type];
         if (confirmation)
@@ -86,7 +84,6 @@ let VerificationService = class VerificationService {
                 await this.throwIfUserExists(email);
                 break;
             case verification_1.EverifationsTypes.EMAIL_PASSWORD:
-            case verification_1.EverifationsTypes.LOGIN:
                 await this.throwIfUserNotExists(email);
                 break;
         }

@@ -22,12 +22,14 @@ const photos_module_1 = require("./entities/photos/photos.module");
 const orders_module_1 = require("./entities/orders/orders.module");
 const reviews_module_1 = require("./entities/reviews/reviews.module");
 const seeder_module_1 = require("./common/seeders/seeder.module");
+const config_1 = require("@nestjs/config");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
 exports.AppModule = AppModule = __decorate([
     (0, common_1.Module)({
         imports: [
+            config_1.ConfigModule.forRoot({ isGlobal: true }),
             core_module_1.CoreModule,
             auth_module_1.AuthModule,
             serve_static_1.ServeStaticModule.forRoot({

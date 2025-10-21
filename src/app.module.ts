@@ -13,9 +13,12 @@ import { PhotosModule } from './entities/photos/photos.module';
 import { OrdersModule } from './entities/orders/orders.module';
 import { ReviewsModule } from './entities/reviews/reviews.module';
 import { SeederModule } from './common/seeders/seeder.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
+  
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     CoreModule,
     AuthModule,
     ServeStaticModule.forRoot({

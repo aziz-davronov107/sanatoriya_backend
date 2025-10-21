@@ -68,27 +68,52 @@ let AuthService = class AuthService {
         console.log(token);
         return token;
     }
-    async login(payload) {
-        const { email, otp } = payload;
-        await this.verificationService.checkConfigOtp({ email, type: verification_1.EverifationsTypes.LOGIN, otp });
-        let user = await this.prisma.user.findUnique({
-            where: { email: payload.email },
-        });
-        if (!user) {
-            throw new common_1.ConflictException('User not Found!');
-        }
-        const profile = await this.prisma.profile.findUnique({
-            where: { userId: user.id, isDisabled: false },
-        });
-        if (!profile) {
-            throw new common_1.ConflictException('Profile not Found!');
-        }
-        const token = await this.getToken(user.id);
-        return token;
-    }
     async refresh_token(id) {
         const token = await this.getToken(id, true);
         return token;
+    }
+    async isCheckPhone(data) {
+        const user = await this.prisma.user.findUnique({
+            where: { phone: data.phone },
+        });
+        if (user) {
+            const token = await this.getToken(user.id);
+            return token;
+        }
+        return user;
+    }
+    async isCheckEmail(data) {
+        const user = await this.prisma.user.findUnique({
+            where: { email: data.email },
+        });
+        if (user) {
+            const token = await this.getToken(user.id);
+            return token;
+        }
+        return user;
+    }
+    async loginOrRegisterWithTelegram(telegramData) {
+        let user = await this.prisma.user.findUnique({
+            where: { telegramChatId: telegramData.telegramId.toString() },
+        });
+        if (!user) {
+            user = await this.prisma.user.create({
+                data: {
+                    telegramChatId: telegramData.telegramId.toString(),
+                },
+            });
+            await this.prisma.profile.create({
+                data: {
+                    userId: user.id,
+                    fullName: `${telegramData.firstName || ''} ${telegramData.lastName || ''}`.trim(),
+                    imageUrl: telegramData.photoUrl,
+                    role: client_1.UserRole.USER,
+                },
+            });
+        }
+        const token = await this.getToken(user.id);
+        const { access_token, refresh_token } = token;
+        return { access_token, refresh_token, user };
     }
 };
 exports.AuthService = AuthService;

@@ -16,9 +16,12 @@ exports.AuthControler = void 0;
 const auth_service_1 = require("./auth.service");
 const common_1 = require("@nestjs/common");
 const auth_dto_1 = require("./dto/auth.dto");
+const check_email_dto_1 = require("./dto/check-email.dto");
+const check_phone_dto_1 = require("./dto/check-phone.dto");
 const swagger_1 = require("@nestjs/swagger");
 const publick_decorator_1 = require("../../core/decorators/publick.decorator");
 const refresh_guard_1 = require("../../core/guards/refresh_guard");
+const passport_1 = require("@nestjs/passport");
 let AuthControler = class AuthControler {
     authService;
     constructor(authService) {
@@ -28,53 +31,112 @@ let AuthControler = class AuthControler {
         return req.user;
     }
     async register(data, res) {
-        let token = await this.authService.register(data);
-        let { access_token, refresh_token } = token;
-        res.cookie('access-token', access_token, {
-            httpOnly: true,
-            sameSite: 'strict',
-            secure: false,
-            maxAge: 15 * 60 * 1000,
-        });
-        res.cookie('refresh-token', refresh_token, {
-            httpOnly: true,
-            sameSite: 'strict',
-            secure: false,
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-        });
-    }
-    async login(res, data) {
-        let token = await this.authService.login(data);
-        let { access_token, refresh_token } = token;
-        res.cookie('access-token', access_token, {
-            httpOnly: true,
-            sameSite: 'strict',
-            secure: false,
-            maxAge: 15 * 60 * 1000,
-        });
-        res.cookie('refresh-token', refresh_token, {
-            httpOnly: true,
-            sameSite: 'strict',
-            secure: false,
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-        });
-        return {
-            access_token,
-            refresh_token,
-        };
+        const token = await this.authService.register(data);
+        const access_token = token?.access_token;
+        const refresh_token = token?.refresh_token;
+        if (access_token) {
+            res.cookie('access-token', access_token, {
+                httpOnly: true,
+                sameSite: 'strict',
+                secure: false,
+                maxAge: 15 * 60 * 1000,
+            });
+        }
+        if (refresh_token) {
+            res.cookie('refresh-token', refresh_token, {
+                httpOnly: true,
+                sameSite: 'strict',
+                secure: false,
+                maxAge: 7 * 24 * 60 * 60 * 1000,
+            });
+        }
+        return token;
     }
     async refresh_token(req, res) {
-        let token = await this.authService.refresh_token(req.user.id);
-        let { access_token } = token;
-        res.cookie('access-token', access_token, {
-            httpOnly: true,
-            sameSite: 'strict',
-            secure: false,
-            maxAge: 15 * 60 * 1000,
-        });
+        const token = await this.authService.refresh_token(req.user.id);
+        const access_token = token?.access_token;
+        if (access_token) {
+            res.cookie('access-token', access_token, {
+                httpOnly: true,
+                sameSite: 'strict',
+                secure: false,
+                maxAge: 15 * 60 * 1000,
+            });
+        }
         return {
             access_token,
         };
+    }
+    async isCheckPhone(data, res) {
+        const token = await this.authService.isCheckPhone(data);
+        const access_token = token?.access_token;
+        const refresh_token = token?.refresh_token;
+        if (access_token) {
+            res.cookie('access-token', access_token, {
+                httpOnly: true,
+                sameSite: 'strict',
+                secure: false,
+                maxAge: 15 * 60 * 1000,
+            });
+        }
+        if (refresh_token) {
+            res.cookie('refresh-token', refresh_token, {
+                httpOnly: true,
+                sameSite: 'strict',
+                secure: false,
+                maxAge: 7 * 24 * 60 * 60 * 1000,
+            });
+        }
+        return token;
+    }
+    async isCheckEmail(data, res) {
+        const token = await this.authService.isCheckEmail(data);
+        const access_token = token?.access_token;
+        const refresh_token = token?.refresh_token;
+        if (access_token) {
+            res.cookie('access-token', access_token, {
+                httpOnly: true,
+                sameSite: 'strict',
+                secure: false,
+                maxAge: 15 * 60 * 1000,
+            });
+        }
+        if (refresh_token) {
+            res.cookie('refresh-token', refresh_token, {
+                httpOnly: true,
+                sameSite: 'strict',
+                secure: false,
+                maxAge: 7 * 24 * 60 * 60 * 1000,
+            });
+        }
+        return token;
+    }
+    async telegramLogin(res) {
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        return res.redirect(`${frontendUrl}/auth/telegram`);
+    }
+    async telegramCallback(req, res) {
+        const token = await this.authService.loginOrRegisterWithTelegram(req.user);
+        const access_token = token?.access_token;
+        const refresh_token = token?.refresh_token;
+        if (access_token) {
+            res.cookie('access-token', access_token, {
+                httpOnly: true,
+                sameSite: 'strict',
+                secure: false,
+                maxAge: 15 * 60 * 1000,
+            });
+        }
+        if (refresh_token) {
+            res.cookie('refresh-token', refresh_token, {
+                httpOnly: true,
+                sameSite: 'strict',
+                secure: false,
+                maxAge: 7 * 24 * 60 * 60 * 1000,
+            });
+        }
+        const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+        res.redirect(`${frontendUrl}/auth/callback?token=${token.access_token}`);
     }
 };
 exports.AuthControler = AuthControler;
@@ -96,16 +158,6 @@ __decorate([
     __metadata("design:returntype", Promise)
 ], AuthControler.prototype, "register", null);
 __decorate([
-    (0, common_1.Post)('login'),
-    (0, swagger_1.ApiBody)({ type: auth_dto_1.LoginDto }),
-    (0, publick_decorator_1.Public)(),
-    __param(0, (0, common_1.Res)({ passthrough: true })),
-    __param(1, (0, common_1.Body)()),
-    __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, auth_dto_1.LoginDto]),
-    __metadata("design:returntype", Promise)
-], AuthControler.prototype, "login", null);
-__decorate([
     (0, common_1.Post)('refresh'),
     (0, common_1.UseGuards)(refresh_guard_1.RefreshTokenGuard),
     (0, publick_decorator_1.Public)(),
@@ -115,6 +167,47 @@ __decorate([
     __metadata("design:paramtypes", [Request, Object]),
     __metadata("design:returntype", Promise)
 ], AuthControler.prototype, "refresh_token", null);
+__decorate([
+    (0, common_1.Post)('check-phone'),
+    (0, publick_decorator_1.Public)(),
+    (0, swagger_1.ApiBody)({ type: check_phone_dto_1.CheckPhoneDto }),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Res)({ passthrough: true })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [check_phone_dto_1.CheckPhoneDto, Object]),
+    __metadata("design:returntype", Promise)
+], AuthControler.prototype, "isCheckPhone", null);
+__decorate([
+    (0, common_1.Post)('check-email'),
+    (0, publick_decorator_1.Public)(),
+    (0, swagger_1.ApiBody)({ type: check_email_dto_1.CheckEmailDto }),
+    __param(0, (0, common_1.Body)()),
+    __param(1, (0, common_1.Res)({ passthrough: true })),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [check_email_dto_1.CheckEmailDto, Object]),
+    __metadata("design:returntype", Promise)
+], AuthControler.prototype, "isCheckEmail", null);
+__decorate([
+    (0, common_1.Get)('telegram'),
+    (0, publick_decorator_1.Public)(),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('telegram')),
+    (0, swagger_1.ApiOperation)({ summary: 'Initiate Telegram OAuth login' }),
+    __param(0, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object]),
+    __metadata("design:returntype", Promise)
+], AuthControler.prototype, "telegramLogin", null);
+__decorate([
+    (0, common_1.Get)('telegram/callback'),
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('telegram')),
+    (0, publick_decorator_1.Public)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Telegram OAuth callback' }),
+    __param(0, (0, common_1.Req)()),
+    __param(1, (0, common_1.Res)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:returntype", Promise)
+], AuthControler.prototype, "telegramCallback", null);
 exports.AuthControler = AuthControler = __decorate([
     (0, swagger_1.ApiTags)('Auth'),
     (0, common_1.Controller)('auth'),

@@ -16,7 +16,6 @@ const verification_1 = require("../../../common/types/verification");
 exports.LimitedVerificationTypes = {
     REGISTER: verification_1.EverifationsTypes.REGISTER,
     EMAIL_PASSWORD: verification_1.EverifationsTypes.EMAIL_PASSWORD,
-    LOGIN: verification_1.EverifationsTypes.LOGIN,
 };
 class SendOtpDto {
     type;

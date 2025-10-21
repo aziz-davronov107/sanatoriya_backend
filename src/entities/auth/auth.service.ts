@@ -73,12 +73,48 @@ export class AuthService {
     const user = await this.prisma.user.findUnique({
       where: { phone: data.phone },
     });
+
+    if (user) {
+      const token = await this.getToken(user.id);
+      return token;
+    }
     return user;
   }
-   async isCheckEmail(data: { email: string }) {
+  async isCheckEmail(data: { email: string }) {
     const user = await this.prisma.user.findUnique({
       where: { email: data.email },
     });
+    if (user) {
+      const token = await this.getToken(user.id);
+      return token;
+    }
     return user;
+  }
+  async loginOrRegisterWithTelegram(telegramData: any) {
+    // Check if user exists by telegramId
+    let user = await this.prisma.user.findUnique({
+      where: { telegramChatId: telegramData.telegramId.toString() },
+    });
+
+    if (!user) {
+      // Register new user
+      user = await this.prisma.user.create({
+        data: {
+          telegramChatId: telegramData.telegramId.toString(),
+        },
+      });
+      await this.prisma.profile.create({
+        data: {
+          userId: user.id,
+          fullName:
+            `${telegramData.firstName || ''} ${telegramData.lastName || ''}`.trim(),
+          imageUrl: telegramData.photoUrl,
+          role: UserRole.USER,
+        },
+      });
+    }
+    const token = await this.getToken(user.id);
+    const { access_token, refresh_token } = token;
+    return { access_token, refresh_token, user };
   }
 }
