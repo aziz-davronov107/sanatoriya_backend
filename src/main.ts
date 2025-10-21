@@ -11,20 +11,29 @@ async function bootstrap() {
 
   app.use(cookieParser());
   app.use(helmet());
-  app.use(
-    rateLimit({
-      windowMs: 15 * 60 * 1000,
-      max: 200,
-      standardHeaders: true,
-      legacyHeaders: false,
-    }),
-  );
-  app.enableCors(
-    {
-      origin: true,
-    }
-  );
-  // use middleware
+  
+  const allowlist = [
+    'http://localhost:3000',
+    'https://localhost:3000',
+    'https://yettibuloq-shifo.uz',
+    'https://api.yettibuloq-shifo.uz'
+  ];
+
+  app.enableCors({
+    origin: (origin, callback) => {
+      if (!origin || allowlist.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Accept'],
+    exposedHeaders: ['set-cookie']
+  });
+
+  app.setGlobalPrefix('api');
 
   app.useGlobalPipes(
     new ValidationPipe({
@@ -45,6 +54,8 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('swagger', app, document);
 
-  await app.listen(process.env.PORT || 3000);
+  await app.listen(process.env.PORT || 3000, () => {
+    console.log(`Server is running on port ${process.env.PORT || 3000}`);
+  });
 }
 bootstrap();
