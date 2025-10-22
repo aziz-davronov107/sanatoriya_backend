@@ -7,6 +7,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { NestExpressApplication } from '@nestjs/platform-express';
 // ❗️ express-rate-limit v7 bo‘lsa:
 import { rateLimit } from 'express-rate-limit'; // (agar v6 bo‘lsa default import)
+import { CorsConfig } from './common/utils/config';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -27,21 +28,7 @@ async function bootstrap() {
     'https://api.yettibuloq-shifo.uz',
   ];
 
-  app.enableCors({
-    origin: (origin, cb) => {
-      if (!origin || allowlist.includes(origin)) cb(null, true);
-      else cb(new Error('Not allowed by CORS'));
-    },
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-    allowedHeaders: [
-      'Content-Type',
-      'Authorization',
-      'X-Requested-With',
-      'Accept',
-    ],
-    exposedHeaders: ['set-cookie'],
-  });
+  new CorsConfig(app).enable(process.env.CORS as string);
 
   app.setGlobalPrefix('api');
 
